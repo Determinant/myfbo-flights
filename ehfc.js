@@ -12,7 +12,8 @@ axios.defaults.withCredentials = true;
 const { JSDOM } = jsdom;
 
 const userAgent = "Mozilla/5.0 Chrome/89.0.4389.90 Mobile Safari/537.36";
-const timezone = "America/New_York";
+const fbo = 'ehfc'; // change this to your local FBO id of MyFBO
+const timezone = "America/New_York"; // change this to your location
 
 const encodeForm = (data) => {
     return Object.keys(data)
@@ -23,7 +24,8 @@ const encodeForm = (data) => {
 async function main() {
     const cookieJar = new tough.CookieJar();
     const password = fs.readFileSync(__dirname + "/.secret").toString().trim();
-    await axios.get('https://prod.myfbo.com/b/linkpage_mobile.asp?fbo=ehfc', {
+    const username = fs.readFileSync(__dirname + "/.username").toString().trim();
+    await axios.get(`https://prod.myfbo.com/b/linkpage_mobile.asp?fbo=${fbo}`, {
         headers: { 'User-Agent': userAgent },
         jar: cookieJar,
         withCredentials: true
@@ -31,12 +33,12 @@ async function main() {
     await axios
         .post('https://prod.myfbo.com/b/login_check.asp', encodeForm({
             'login': 'pda',
-            'email': 'tederminant@gmail.com',
+            'email': username,
             'password': password,
         }), {
             headers: {
                 'User-Agent': userAgent,
-                'Referer': 'https://prod.myfbo.com/b/linkpage_mobile.asp?fbo=ehfc',
+                'Referer': `https://prod.myfbo.com/b/linkpage_mobile.asp?fbo=${fbo}`,
             },
             jar: cookieJar,
             withCredentials: true
