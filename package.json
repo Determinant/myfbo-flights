@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "axios": "^0.21.1",
+    "axios-cookiejar-support": "^1.0.1",
+    "jsdom": "^16.5.3",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
+    "tough-cookie": "^4.0.0"
+  }
+}
