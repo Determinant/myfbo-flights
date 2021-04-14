@@ -1,37 +1,41 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
 const axios = require('axios').default;
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
-axiosCookieJarSupport(axios);
-const cookieJar = new tough.CookieJar();
-axios.defaults.withCredentials = true;
 const jsdom = require("jsdom");
 const moment = require('moment-timezone');
+
+axiosCookieJarSupport(axios);
+axios.defaults.withCredentials = true;
 const { JSDOM } = jsdom;
-const ua = "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Mobile Safari/537.36";
+
+const userAgent = "Mozilla/5.0 Chrome/89.0.4389.90 Mobile Safari/537.36";
 const timezone = "America/New_York";
 
 const encodeForm = (data) => {
-  return Object.keys(data)
-      .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-      .join('&');
+    return Object.keys(data)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+        .join('&');
 }
 
 async function main() {
+    const cookieJar = new tough.CookieJar();
+    const password = fs.readFileSync(__dirname + "/.secret").toString().trim();
     await axios.get('https://prod.myfbo.com/b/linkpage_mobile.asp?fbo=ehfc', {
-        headers: { 'User-Agent': ua },
+        headers: { 'User-Agent': userAgent },
         jar: cookieJar,
         withCredentials: true
     });
     await axios
         .post('https://prod.myfbo.com/b/login_check.asp', encodeForm({
             'login': 'pda',
-            'timepass': '4/14/2021 9:31:50 PM',
             'email': 'tederminant@gmail.com',
-            'password': '314$ymf$corn',
-            'device': 'pda'
+            'password': password,
         }), {
             headers: {
-                'User-Agent': ua,
+                'User-Agent': userAgent,
                 'Referer': 'https://prod.myfbo.com/b/linkpage_mobile.asp?fbo=ehfc',
             },
             jar: cookieJar,
