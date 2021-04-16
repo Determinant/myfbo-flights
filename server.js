@@ -18,7 +18,6 @@ const admin = {id: '42', email: 'admin', password: 'admin'};
 passport.use(new LocalStrategy({ usernameField: 'user' },
     (email, password, done) => {
         if (email === admin.email && password === admin.password) {
-            console.log('Local strategy returned true')
             return done(null, admin)
         }
         return done(null, false);
@@ -56,51 +55,64 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+function getRoot(req) {
+    let root = req.header('Referer');
+    if (root === undefined)
+        root = '';
+    return root;
+}
+
 app.get('/', async (req, res) => {
     if (flights === null) {
         flights = await showFlights();
     }
+    let root = getRoot(req);
+    res.set('Content-Type', 'text/html');
     res.end(`<pre>${flights}</pre> \
         ${req.user ?
-        `<form action="update" method="POST" style="display: inline-block;"> \
+            `<form action="${root}/update" method="POST" style="display: inline-block;"> \
             <input type="submit" value="Update" onclick="this.disabled=true; this.value='Updating'; this.form.submit();"/> \
         </form> \
-        <form action="logout" method="POST" style="display: inline-block;"> \
+        <form action="${root}/logout" method="POST" style="display: inline-block;"> \
             <input type="submit" value="Logout"/> \
         </form>` :
-        `<input type="submit" value="Login" onclick="window.location='/login';"/>`}`);
+        `<form action="${root}/login" method="GET"><input type="submit" value="Login"/></form>`}`);
 });
 
 app.get('/login', (req, res) => {
-    res.send('<form action="/login" method="POST"><table> \
+    res.set('Content-Type', 'text/html');
+    res.send('<form action="login" method="POST"><table> \
         <tr><td>Username:</td><td><input name="user"/></td></tr> \
         <tr><td>Password:</td><td><input name="password"/></td></tr> \
         <tr><td colspan="2" style="text-align: right"><input type="submit" value="Login"></td></tr></table></form>');
 });
 
 app.post('/login', (req, res, next) => {
+    let root = getRoot(req);
     passport.authenticate('local', (err, user, info) => {
         if (err) { return next(err); }
-        if (!user) { return res.redirect('/login'); }
+        if (!user) { return res.redirect(`${root}/login`); }
         req.login(user, (err) => {
-            res.redirect('/');
+            res.redirect(`${root}/`);
         });
     })(req, res, next);
 });
 
 app.post('/logout', (req, res) => {
+    let root = getRoot(req);
     req.logout();
-    res.redirect('/');
+    res.redirect(`${root}/`);
 });
 
 
 app.post('/update', async (req, res) => {
+    let root = getRoot(req);
     if (req.user) {
         console.log('update');
         flights = await showFlights();
-        res.redirect('/');
+        res.redirect(`${root}/`);
     } else {
-        res.redirect('/login');
+        res.redirect(`${root}/login`);
     }
     res.end();
 });
