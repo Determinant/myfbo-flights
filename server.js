@@ -56,7 +56,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 function getRoot(req) {
-    let root = req.header('Referer');
+    let root = req.header('__webroot');
     if (root === undefined)
         root = '';
     return root;
