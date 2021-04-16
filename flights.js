@@ -21,7 +21,7 @@ const encodeForm = (data) => {
         .join('&');
 }
 
-async function main() {
+async function showFlights() {
     const cookieJar = new tough.CookieJar();
     const password = fs.readFileSync(__dirname + "/.secret").toString().trim();
     const username = fs.readFileSync(__dirname + "/.username").toString().trim();
@@ -43,10 +43,10 @@ async function main() {
             jar: cookieJar,
             withCredentials: true
         });
-    const res = await axios.get('https://prod.myfbo.com/ct/rsv_list.asp', {
+    const ret = await axios.get('https://prod.myfbo.com/ct/rsv_list.asp', {
         jar: cookieJar,
         withCredentials: true});
-    const dom = new JSDOM(res.data);
+    const dom = new JSDOM(ret.data);
     const raw = dom.window.document.querySelector("input[name='msg']").value.split('\n');
     const records = [];
     const today = moment(new Date());
@@ -67,19 +67,31 @@ async function main() {
             });
         }
     });
+    let res = '';
     const fmtTime = m => m.format("HH:mm", timezone);
     records.forEach(r => {
-        console.log(`${r.entity}: ${r.start.format("MMM D YYYY")} [${fmtTime(r.start)}-${fmtTime(r.end)}]`);
+        res += `${r.entity}: ${r.start.format("MMM D YYYY")} [${fmtTime(r.start)}-${fmtTime(r.end)}]\n`;
         if (!r.entity.match('C1[57]2 .*')) {
-            console.log();
+            res += '\n';
         }
     });
     if (lessonToday >= 0) {
         const d = records[lessonToday];
-        console.log(`!!! There is a lesson today: ${fmtTime(d.start)}-${fmtTime(d.end)}.`);
+        res += `!!! There is a lesson today: ${fmtTime(d.start)}-${fmtTime(d.end)}.\n`;
     } else {
-        console.log("No lesson today.");
+        res += `No lesson today.\n`;
     }
+    return res;
 }
 
-main();
+async function main() {
+    console.log(await showFlights());
+}
+
+if (require.main === module) {
+    main();
+}
+
+module.exports = {
+    showFlights
+}

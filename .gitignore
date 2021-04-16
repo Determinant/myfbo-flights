@@ -1,0 +1,5 @@
+/.secret
+/.username
+/node_modules
+/myfbo-flights-server.db
+/package-lock.json
