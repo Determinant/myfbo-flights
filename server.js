@@ -62,29 +62,36 @@ function getRoot(req) {
     return root;
 }
 
+const htmlHeader = '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>';
+const htmlFooter = '</body></html>';
+
 app.get('/', async (req, res) => {
     if (flights === null) {
         flights = await showFlights();
     }
     let root = getRoot(req);
     res.set('Content-Type', 'text/html');
-    res.end(`<pre>${flights}</pre> \
+    res.write(htmlHeader);
+    res.write(`<pre>${flights}</pre> \
         ${req.user ?
-            `<form action="${root}/update" method="POST" style="display: inline-block;"> \
-            <input type="submit" value="Update" onclick="this.disabled=true; this.value='Updating'; this.form.submit();"/> \
+        `<form action="${root}/update" method="POST" style="display: inline-block;"> \
+            <input type="submit" value="Update" onclick="this.disabled=true; this.value='Updating'; this.form.submit();" style="min-width: 20ex; min-height: 5ex;" /> \
         </form> \
         <form action="${root}/logout" method="POST" style="display: inline-block;"> \
-            <input type="submit" value="Logout"/> \
+            <input type="submit" value="Logout" style="min-height: 5ex;"/> \
         </form>` :
-        `<form action="${root}/login" method="GET"><input type="submit" value="Login"/></form>`}`);
+        `<form action="${root}/login" method="GET"><input type="submit" value="Login" style="min-height: 5ex;"/></form>`}`);
+    res.end(htmlFooter);
 });
 
 app.get('/login', (req, res) => {
     res.set('Content-Type', 'text/html');
-    res.send('<form action="login" method="POST"><table> \
+    res.write(htmlHeader);
+    res.write('<form action="login" method="POST"><table> \
         <tr><td>Username:</td><td><input name="user"/></td></tr> \
         <tr><td>Password:</td><td><input name="password"/></td></tr> \
-        <tr><td colspan="2" style="text-align: right"><input type="submit" value="Login"></td></tr></table></form>');
+        <tr><td colspan="2" style="text-align: right"><input type="submit" value="Login" style="min-height: 5ex;"/></td></tr></table></form>');
+    res.end(htmlFooter);
 });
 
 app.post('/login', (req, res, next) => {
