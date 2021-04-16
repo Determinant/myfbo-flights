@@ -58,7 +58,7 @@ async function main() {
             const end = moment.tz(m[3], 'MM/DD/YY HH:mm', timezone);
             if (today.isSame(start, 'day') ||
                 today.isSame(end, 'day')) {
-                lessonToday = i;
+                lessonToday = records.length;
             }
             records.push({
                 'entity': m[1],
