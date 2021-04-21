@@ -13,7 +13,7 @@ const SqliteStore = sqliteStoreFactory(session);
 const { showFlights } = require('./flights.js');
 
 const port = 8080;
-const admin = {id: '42', email: 'admin', password: 'admin'};
+const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
 
 passport.use(new LocalStrategy({ usernameField: 'user' },
     (email, password, done) => {

@@ -47,7 +47,11 @@ async function showFlights() {
         jar: cookieJar,
         withCredentials: true});
     const dom = new JSDOM(ret.data);
-    const raw = dom.window.document.querySelector("input[name='msg']").value.split('\n');
+    const raw = dom.window.document.querySelector("input[name='msg']");
+    if (!raw) {
+        return '';
+    }
+    raw = raw.value.split('\n');
     const records = [];
     const today = moment(new Date());
     let lessonToday = -1;
