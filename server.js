@@ -89,7 +89,7 @@ app.get('/login', (req, res) => {
     res.write(htmlHeader);
     res.write('<form action="login" method="POST"><table> \
         <tr><td>Username:</td><td><input name="user"/></td></tr> \
-        <tr><td>Password:</td><td><input name="password"/></td></tr> \
+        <tr><td>Password:</td><td><input name="password" type="password"/></td></tr> \
         <tr><td colspan="2" style="text-align: right"><input type="submit" value="Login" style="min-height: 5ex;"/></td></tr></table></form>');
     res.end(htmlFooter);
 });
