@@ -28,8 +28,16 @@ async function showFlights() {
         jar: cookieJar,
         withCredentials: true});
     const dom = new JSDOM(ret.data);
-    const vsg = dom.window.document.querySelector("input[name='__VIEWSTATEGENERATOR']").value;
-    const vs = dom.window.document.querySelector("input[name='__VIEWSTATE']").value;
+    let raw = dom.window.document.querySelector("input[name='__VIEWSTATEGENERATOR']");
+    if (!raw) {
+        return '';
+    }
+    const vsg = raw.value;
+    raw = dom.window.document.querySelector("input[name='__VIEWSTATE']");
+    if (!raw) {
+        return '';
+    }
+    const vs = raw.value;
 
     await axios
         .post('https://advantage.paperlessfbo.com/', encodeForm({
@@ -51,6 +59,9 @@ async function showFlights() {
         withCredentials: true});
     const dom2 = new JSDOM(ret.data);
     const rows = dom2.window.document.getElementById("ctl00_ContentPlaceHolder1_GridView1").rows;
+    if (!rows) {
+        return '';
+    }
     const records = [];
     const today = moment(new Date());
     let lessonToday = -1;
