@@ -10,7 +10,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const sqlite3 = require('sqlite3');
 const sqliteStoreFactory = require('express-session-sqlite').default;
 const SqliteStore = sqliteStoreFactory(session);
-const { showFlights } = require('./flights.js');
+const { showFlights, fbo } = require('./flights.js');
 const { google } = require('googleapis');
 const RFC4122 = require('rfc4122');
 
@@ -18,6 +18,14 @@ const port = 8080;
 const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
 const myCalendarId = "1luv5uti2j7hnq1ddcofv0sbn4@group.calendar.google.com";
 const googleClient = JSON.parse(fs.readFileSync(__dirname + "/.gapi"));
+
+const getAircraftLink = aircraft => {
+    if (fbo == 'advantage') {
+        return `https://www.advantage-aviation.com/aircraft/n${aircraft.toLowerCase()}`;
+    } else {
+        return '';
+    }
+}
 
 passport.use(new LocalStrategy({ usernameField: 'user' },
     (email, password, done) => {
@@ -134,7 +142,8 @@ app.post('/update', async (req, res) => {
                 const eventId = rfc4122.v5(`myfbo-flight-${r.entity}-${r.start.format()}-${r.end.format()}`, 'string').replace(/-/g, '');
                 const event = {
                     id: eventId,
-                    summary: `Flight Training (${r.entity})`,
+                    summary: `Flight Training (N${r.entity})`,
+                    description: getAircraftLink(r.entity),
                     end: {
                         'dateTime': r.end.format(),
                     },
