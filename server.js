@@ -11,9 +11,13 @@ const sqlite3 = require('sqlite3');
 const sqliteStoreFactory = require('express-session-sqlite').default;
 const SqliteStore = sqliteStoreFactory(session);
 const { showFlights } = require('./flights.js');
+const { google } = require('googleapis');
+const RFC4122 = require('rfc4122');
 
 const port = 8080;
 const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
+const myCalendarId = "1luv5uti2j7hnq1ddcofv0sbn4@group.calendar.google.com";
+const googleClient = JSON.parse(fs.readFileSync(__dirname + "/.gapi"));
 
 passport.use(new LocalStrategy({ usernameField: 'user' },
     (email, password, done) => {
@@ -67,7 +71,8 @@ const htmlFooter = '</body></html>';
 
 app.get('/', async (req, res) => {
     if (flights === null) {
-        flights = await showFlights();
+        const { text } = await showFlights();
+        flights = text;
     }
     let root = getRoot(req);
     res.set('Content-Type', 'text/html');
@@ -116,13 +121,77 @@ app.post('/update', async (req, res) => {
     let root = getRoot(req);
     if (req.user) {
         console.log('update');
-        flights = await showFlights();
+        const { text, records } = await showFlights();
+        flights = text;
         res.redirect(`${root}/`);
+        const accessToken = req.session.access_token;
+        if (accessToken) {
+            let rfc4122 = new RFC4122();
+            const auth = new google.auth.OAuth2();
+            auth.setCredentials({'access_token': accessToken});
+            const cal = google.calendar({version: 'v3', auth});
+            records.forEach(r => {
+                const eventId = rfc4122.v5(`myfbo-flight-${r.entity}-${r.start.format()}-${r.end.format()}`, 'string').replace(/-/g, '');
+                const event = {
+                    id: eventId,
+                    summary: `Flight Training (${r.entity})`,
+                    end: {
+                        'dateTime': r.end.format(),
+                    },
+                    start: {
+                        'dateTime': r.start.format(),
+                    }
+                };
+                cal.events.insert({
+                    calendarId: myCalendarId,
+                    resource: event,
+                }, (err, res) => {
+                    if (err) {
+                        if (err.errors[0].reason == 'duplicate') {
+                            cal.events.update({
+                                calendarId: myCalendarId,
+                                eventId,
+                                resource: event,
+                            }, (err, res) => {
+                                if (err) console.log(err);
+                                else console.log("updated calendar event");
+                            });
+                        } else {
+                            console.log(err);
+                        }
+                    } else {
+                        console.log("inserted calendar event");
+                    }
+                });
+            });
+        }
     } else {
         res.redirect(`${root}/login`);
     }
     res.end();
 });
+
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+passport.use(new GoogleStrategy({
+    clientID: googleClient.clientID,
+    clientSecret: googleClient.clientSecret,
+    callbackURL: googleClient.callbackURL,
+    scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar.events']
+}, (accessToken, refreshToken, profile, done) => {
+    profile.accessToken = accessToken;
+    return done(null, profile);
+}));
+
+app.get('/auth',
+  passport.authenticate('google', { session: false }));
+
+app.get('/auth/callback',
+  passport.authenticate('google', { session: false, failureRedirect: '/login' }),
+    function(req, res) {
+        req.session.access_token = req.user.accessToken;
+        res.redirect('/');
+    });
+
 
 app.listen(port, () => {
     console.log(`listening at localhost:${port}`);

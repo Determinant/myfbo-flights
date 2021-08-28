@@ -88,7 +88,7 @@ async function showFlightsMyFBO() {
     } else {
         res += `No lesson today.\n`;
     }
-    return res;
+    return { text: res, records };
 }
 
 async function showFlightsPaperlessFBO() {
@@ -161,7 +161,7 @@ async function showFlightsPaperlessFBO() {
     } else {
         res += `No lesson today.\n`;
     }
-    return res;
+    return { text: res, records };
 }
 
 async function showFlights() {
