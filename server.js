@@ -130,7 +130,7 @@ app.post('/update', async (req, res) => {
             const auth = new google.auth.OAuth2();
             auth.setCredentials({'access_token': accessToken});
             const cal = google.calendar({version: 'v3', auth});
-            records.forEach(r => {
+            for (const r of records) {
                 const eventId = rfc4122.v5(`myfbo-flight-${r.entity}-${r.start.format()}-${r.end.format()}`, 'string').replace(/-/g, '');
                 const event = {
                     id: eventId,
@@ -142,28 +142,29 @@ app.post('/update', async (req, res) => {
                         'dateTime': r.start.format(),
                     }
                 };
-                cal.events.insert({
-                    calendarId: myCalendarId,
-                    resource: event,
-                }, (err, res) => {
-                    if (err) {
-                        if (err.errors[0].reason == 'duplicate') {
-                            cal.events.update({
+                try {
+                    await cal.events.insert({
+                        calendarId: myCalendarId,
+                        resource: event,
+                    });
+                    console.log("inserted calendar event");
+                } catch (err) {
+                    if (err.errors[0].reason == 'duplicate') {
+                        try {
+                            await cal.events.update({
                                 calendarId: myCalendarId,
                                 eventId,
                                 resource: event,
-                            }, (err, res) => {
-                                if (err) console.log(err);
-                                else console.log("updated calendar event");
                             });
-                        } else {
+                            console.log("updated calendar event");
+                        } catch(err) {
                             console.log(err);
                         }
                     } else {
-                        console.log("inserted calendar event");
+                        console.log(err);
                     }
-                });
-            });
+                }
+            };
         }
     } else {
         res.redirect(`${root}/login`);
