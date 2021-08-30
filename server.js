@@ -18,6 +18,7 @@ const port = 8080;
 const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
 const myCalendarId = "1luv5uti2j7hnq1ddcofv0sbn4@group.calendar.google.com";
 const googleClient = JSON.parse(fs.readFileSync(__dirname + "/.gapi"));
+const awcAirports = ['KPAO', 'KSFO', 'KSQL', 'KOAK'];
 
 const getAircraftLink = aircraft => {
     if (fbo == 'advantage') {
@@ -76,6 +77,29 @@ function getRoot(req) {
 
 const htmlHeader = '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>';
 const htmlFooter = '</body></html>';
+const awcInfo = `
+    <hr>
+    <div id="awc"><h3>Info from aviationweather.gov</h3></div>
+    <script>
+      fetch('https://bft.rocks/awc/metar/data?ids=${awcAirports.map(s => s.toLowerCase()).join('+')}&format=raw&date=&hours=0&taf=on',{
+              method: 'GET',
+              mode: 'cors',
+            }).then(response => response.text())
+              .then(html => {
+                      var parser = new DOMParser();
+                      var doc = parser.parseFromString(html, 'text/html');
+                      doc.getElementById('app_menu').remove();
+                      var info = doc.getElementById('awc_main_content_wrap');
+                      info.querySelectorAll('hr').forEach(e => e.removeAttribute('width'));
+                      info.querySelectorAll('strong').forEach(e => {
+                              var t = document.createElement('code');
+                              t.innerText = e.innerText;
+                              e.replaceWith(t);
+                              t.parentNode.insertBefore(document.createElement('br'), t);
+                            });
+                      document.getElementById('awc').appendChild(info);
+                    });
+    </script>`;
 
 app.get('/', async (req, res) => {
     if (flights === null) {
@@ -94,6 +118,7 @@ app.get('/', async (req, res) => {
             <input type="submit" value="Logout" style="min-height: 5ex;"/> \
         </form>` :
         `<form action="${root}/login" method="GET"><input type="submit" value="Login" style="min-height: 5ex;"/></form>`}`);
+	res.write(awcInfo);
     res.end(htmlFooter);
 });
 
