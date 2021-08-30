@@ -111,7 +111,10 @@ const htmlHeader = `
 const htmlFooter = '</body></html>';
 const awcInfo = `
     <hr>
-    <div id="awc"><h3>Info from aviationweather.gov</h3></div>
+    <div id="awc">
+      <h3>Info from aviationweather.gov</h3>
+      <h4>Raw</h4>
+    </div>
     <script>
       var formatted = {};
       var awcAirports = [${awcAirports.map(s => `"${s}"`).join(',')}];
@@ -126,9 +129,16 @@ const awcInfo = `
           var raw = doc.getElementById('awc_main_content_wrap');
 
           raw.querySelectorAll('code').forEach(e => {
-            var taf = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9]*/[0-9]* ');
-            var metar = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9A-Z]*KT ');
-            if (taf) {
+            var taf = e.innerText.match('(K[A-Z]*) [0-9]*Z');
+            var metar = e.innerText.match('(K[A-Z]*) [0-9]*Z .*A[0-9]{4}');
+            if (metar) {
+              var ap = metar[1];
+              e.innerHTML = e.innerHTML.replace(ap, '');
+              if (!formatted[ap]) {
+                formatted[ap] = {taf: null, metar: null};
+              }
+              formatted[ap].metar = e;
+            } else if (taf) {
               e.innerHTML = e.innerHTML.replaceAll('&nbsp;&nbsp;', '<span class="indent"></span>');
               var wrapper = document.createElement('div');
               wrapper.classList = 'taf';
@@ -141,13 +151,6 @@ const awcInfo = `
                 formatted[ap] = {taf: null, metar: null};
               }
               formatted[ap].taf = wrapper;
-            } else if (metar) {
-              var ap = metar[1];
-              e.innerHTML = e.innerHTML.replace(ap, '');
-              if (!formatted[ap]) {
-                formatted[ap] = {taf: null, metar: null};
-              }
-              formatted[ap].metar = e;
             }
           });
           var info = document.createElement('div');
@@ -189,6 +192,23 @@ const awcInfo = `
             info.appendChild(document.createElement('hr'));
           });
           document.getElementById('awc').appendChild(info);
+        }).then(() => {
+          var label = document.createElement("h4");
+          label.innerText = "Decoded";
+          awc.appendChild(label);
+          fetch('https://bft.rocks/awc/metar/data?ids=${awcAirports.map(s => s.toLowerCase()).join('+')}&format=decoded&date=&hours=0&taf=on',{
+            method: 'GET',
+            mode: 'cors',
+          }).then(response => response.text())
+            .then(html => {
+              var parser = new DOMParser();
+              var doc = parser.parseFromString(html, 'text/html');
+              doc.getElementById('app_menu').remove();
+              var raw = doc.getElementById('awc_main_content_wrap');
+              raw.querySelectorAll('table').forEach(e => {
+                awc.appendChild(e);
+              });
+            });
         });
     </script>`;
 
