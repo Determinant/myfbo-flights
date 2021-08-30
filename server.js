@@ -75,30 +75,122 @@ function getRoot(req) {
     return root;
 }
 
-const htmlHeader = '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>';
+const htmlHeader = `
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      strong.code::after {
+        content: "Airport:";
+        margin-right: 1ex;
+      }
+      strong.taf::after {
+        content: "TAF:";
+        margin-right: 1ex;
+      }
+      strong.metar::after {
+        content: "METAR:";
+        margin-right: 1ex;
+      }
+      div.taf {
+        display: inline-block;
+        vertical-align: top;
+      }
+      table.ap td {
+        vertical-align: top;
+      }
+      table.ap td.label {
+        font-size: 80%;
+        text-align: right;
+      }
+      .indent {
+        margin-right: 4ex;
+      }
+    </style>
+    </head><body>`;
 const htmlFooter = '</body></html>';
 const awcInfo = `
     <hr>
     <div id="awc"><h3>Info from aviationweather.gov</h3></div>
     <script>
-      fetch('https://bft.rocks/awc/metar/data?ids=${awcAirports.map(s => s.toLowerCase()).join('+')}&format=raw&date=&hours=0&taf=on',{
-              method: 'GET',
-              mode: 'cors',
-            }).then(response => response.text())
-              .then(html => {
-                      var parser = new DOMParser();
-                      var doc = parser.parseFromString(html, 'text/html');
-                      doc.getElementById('app_menu').remove();
-                      var info = doc.getElementById('awc_main_content_wrap');
-                      info.querySelectorAll('hr').forEach(e => e.removeAttribute('width'));
-                      info.querySelectorAll('strong').forEach(e => {
-                              var t = document.createElement('code');
-                              t.innerText = e.innerText;
-                              e.replaceWith(t);
-                              t.parentNode.insertBefore(document.createElement('br'), t);
-                            });
-                      document.getElementById('awc').appendChild(info);
-                    });
+      var formatted = {};
+      var awcAirports = [${awcAirports.map(s => `"${s}"`).join(',')}];
+      fetch('https://bft.rocks/awc/metar/data?ids=' + awcAirports.map(s => s.toLowerCase()).join('+') + '&format=raw&date=&hours=0&taf=on',{
+        method: 'GET',
+        mode: 'cors',
+      }).then(response => response.text())
+        .then(html => {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          doc.getElementById('app_menu').remove();
+          var raw = doc.getElementById('awc_main_content_wrap');
+
+          raw.querySelectorAll('code').forEach(e => {
+            const taf = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9]*/[0-9]* ');
+            const metar = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9]*KT ');
+            if (taf) {
+              e.innerHTML = e.innerHTML.replaceAll('&nbsp;&nbsp;', '<span class="indent"></span>');
+              var wrapper = document.createElement('div');
+              wrapper.classList = 'taf';
+              e.parentNode.insertBefore(wrapper, e);
+              wrapper.parentNode.removeChild(e);
+              wrapper.appendChild(e);
+              var ap = taf[1];
+              e.innerHTML = e.innerHTML.replace(ap, '');
+              if (!formatted[ap]) {
+                formatted[ap] = {taf: null, metar: null};
+              }
+              formatted[ap].taf = wrapper;
+            } else if (metar) {
+              var ap = metar[1];
+              e.innerHTML = e.innerHTML.replace(ap, '');
+              if (!formatted[ap]) {
+                formatted[ap] = {taf: null, metar: null};
+              }
+              formatted[ap].metar = e;
+            }
+          });
+          var info = document.createElement('div');
+
+          var date = raw.querySelector('p[clear="both"]');
+          var dateText = document.createElement('code');
+          dateText.innerHTML = date.innerText.replace(/.*Data at: ([0-9]*) UTC ([0-9]*) ([a-zA-Z]*) ([0-9]*).*/, 'Time: $1Z [$3 $2, $4]<hr>');
+          info.appendChild(dateText);
+          awcAirports.forEach(ap => {
+            console.log(formatted[ap]);
+            var table = document.createElement('table');
+            table.classList = 'ap';
+
+            var code = table.insertRow();
+            var codeLabel = document.createElement('strong');
+            codeLabel.classList = 'code';
+            var apCode = document.createElement('code');
+            apCode.innerText = ap;
+            code.insertCell().appendChild(codeLabel);
+            code.insertCell().appendChild(apCode);
+            codeLabel.parentNode.classList = 'label';
+
+            var metar = table.insertRow();
+            var metarLabel = document.createElement('strong');
+            metarLabel.classList = 'metar';
+            metar.insertCell().appendChild(metarLabel);
+            metar.insertCell().appendChild(formatted[ap].metar);
+            metarLabel.parentNode.classList = 'label';
+
+            var taf = table.insertRow();
+            var tafLabel = document.createElement('strong');
+            var noTAF = document.createElement('code');
+            noTAF.innerText = 'N/A';
+            tafLabel.classList = 'taf';
+            taf.insertCell().appendChild(tafLabel);
+            taf.insertCell().appendChild(formatted[ap].taf || noTAF);
+            tafLabel.parentNode.classList = 'label';
+
+            info.appendChild(table);
+            info.appendChild(document.createElement('hr'));
+          });
+          document.getElementById('awc').appendChild(info);
+        });
     </script>`;
 
 app.get('/', async (req, res) => {
