@@ -126,8 +126,8 @@ const awcInfo = `
           var raw = doc.getElementById('awc_main_content_wrap');
 
           raw.querySelectorAll('code').forEach(e => {
-            const taf = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9]*/[0-9]* ');
-            const metar = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9A-Z]*KT ');
+            var taf = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9]*/[0-9]* ');
+            var metar = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9A-Z]*KT ');
             if (taf) {
               e.innerHTML = e.innerHTML.replaceAll('&nbsp;&nbsp;', '<span class="indent"></span>');
               var wrapper = document.createElement('div');
