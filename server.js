@@ -127,7 +127,7 @@ const awcInfo = `
 
           raw.querySelectorAll('code').forEach(e => {
             const taf = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9]*/[0-9]* ');
-            const metar = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9]*KT ');
+            const metar = e.innerText.match('(K[A-Z]*) [0-9]*Z [0-9A-Z]*KT ');
             if (taf) {
               e.innerHTML = e.innerHTML.replaceAll('&nbsp;&nbsp;', '<span class="indent"></span>');
               var wrapper = document.createElement('div');
@@ -157,7 +157,6 @@ const awcInfo = `
           dateText.innerHTML = date.innerText.replace(/.*Data at: ([0-9]*) UTC ([0-9]*) ([a-zA-Z]*) ([0-9]*).*/, 'Time: $1Z [$3 $2, $4]<hr>');
           info.appendChild(dateText);
           awcAirports.forEach(ap => {
-            console.log(formatted[ap]);
             var table = document.createElement('table');
             table.classList = 'ap';
 
