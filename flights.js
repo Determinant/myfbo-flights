@@ -152,8 +152,8 @@ async function showFlightsPaperlessFBO() {
     }
     let res = '';
     const fmtTime = m => m.format("HH:mm", timezone);
-    records.forEach(r => {
-        res += `${r.entity}: ${r.start.format("MMM D YYYY")} [${fmtTime(r.start)}-${fmtTime(r.end)}]\n`;
+    records.forEach((r, i) => {
+        res += `${i}. ${r.entity}: ${r.start.format("MMM DD YYYY")} [${fmtTime(r.start)}-${fmtTime(r.end)}] ${r.end.diff(r.start, 'hours')}h\n`;
     });
     if (lessonToday >= 0) {
         const d = records[lessonToday];
