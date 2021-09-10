@@ -106,6 +106,59 @@ const htmlHeader = `
       .indent {
         margin-right: 4ex;
       }
+      input[type="submit"] {
+        background-color: #3c3836;
+        color: #fbf1c7;
+        border: none;
+        min-height: 5ex;
+        padding-left: 1ex;
+        padding-right: 1ex;
+      }
+      input[type="submit"]:hover {
+        background-color: #504945;
+        cursor: pointer;
+      }
+      input[type="text"] {
+        background-color: #3c3836;
+        color: #fff !important;
+        -webkit-box-shadow: 0 0 0 30px #3c3836 inset !important;
+        -webkit-text-fill-color: #fbf1c7 !important;
+        border: 0.5px solid #fbf1c7;
+        min-height: 3ex;
+      }
+      input[type="password"] {
+        background-color: #3c3836;
+        color: #fff !important;
+        -webkit-box-shadow: 0 0 0 30px #3c3836 inset !important;
+        -webkit-text-fill-color: #fbf1c7 !important;
+        border: 0.5px solid #fbf1c7;
+        min-height: 3ex;
+      }
+      input, button, table, h3, h4 {
+        font-size: inherit;
+      }
+      table td.left {
+        text-align: right;
+      }
+      body {
+        background-color: #282828;
+        color: #fbf1c7;
+        font-size: 1.2rem;
+      }
+      hr {
+        border: 0;
+        height: 1px;
+        background: #665c54;
+        background-image: linear-gradient(to right, #282828, #665c54, #282828);
+      }
+      table.decoded td {
+        background-color: inherit !important;
+      }
+      table.decoded, table.ap {
+        padding: 1ex;
+        border: 0.5px solid #504945;
+        margin-bottom: 1ex;
+      }
     </style>
     </head><body>`;
 const htmlFooter = '</body></html>';
@@ -157,7 +210,7 @@ const awcInfo = `
 
           var date = raw.querySelector('p[clear="both"]');
           var dateText = document.createElement('code');
-          dateText.innerHTML = date.innerText.replace(/.*Data at: ([0-9]*) UTC ([0-9]*) ([a-zA-Z]*) ([0-9]*).*/, 'Time: $1Z [$3 $2, $4]<hr>');
+          dateText.innerHTML = date.innerText.replace(/.*Data at: ([0-9]*) UTC ([0-9]*) ([a-zA-Z]*) ([0-9]*).*/, 'Time: $1Z [$3 $2, $4]');
           info.appendChild(dateText);
           awcAirports.forEach(ap => {
             var table = document.createElement('table');
@@ -189,7 +242,6 @@ const awcInfo = `
             tafLabel.parentNode.classList = 'label';
 
             info.appendChild(table);
-            info.appendChild(document.createElement('hr'));
           });
           document.getElementById('awc').appendChild(info);
         }).then(() => {
@@ -206,6 +258,7 @@ const awcInfo = `
               doc.getElementById('app_menu').remove();
               var raw = doc.getElementById('awc_main_content_wrap');
               raw.querySelectorAll('table').forEach(e => {
+                e.classList = 'decoded';
                 awc.appendChild(e);
               });
             });
@@ -223,12 +276,12 @@ app.get('/', async (req, res) => {
     res.write(`<pre>${flights}</pre> \
         ${req.user ?
         `<form action="${root}/update" method="POST" style="display: inline-block;"> \
-            <input type="submit" value="Update" onclick="this.disabled=true; this.value='Updating'; this.form.submit();" style="min-width: 20ex; min-height: 5ex;" /> \
+            <input type="submit" value="Update" onclick="this.disabled=true; this.value='Updating'; this.form.submit();" style="min-width: 20ex;" /> \
         </form> \
         <form action="${root}/logout" method="POST" style="display: inline-block;"> \
-            <input type="submit" value="Logout" style="min-height: 5ex;"/> \
+            <input type="submit" value="Logout"/> \
         </form>` :
-        `<form action="${root}/login" method="GET"><input type="submit" value="Login" style="min-height: 5ex;"/></form>`}`);
+        `<form action="${root}/login" method="GET"><input type="submit" value="Login"/></form>`}`);
 	res.write(awcInfo);
     res.end(htmlFooter);
 });
@@ -237,8 +290,8 @@ app.get('/login', (req, res) => {
     res.set('Content-Type', 'text/html');
     res.write(htmlHeader);
     res.write('<form action="login" method="POST"><table> \
-        <tr><td>Username:</td><td><input name="user"/></td></tr> \
-        <tr><td>Password:</td><td><input name="password" type="password"/></td></tr> \
+        <tr><td class="left">Username:</td><td><input name="user" type="text"/></td></tr> \
+        <tr><td class="left">Password:</td><td><input name="password" type="password"/></td></tr> \
         <tr><td colspan="2" style="text-align: right"><input type="submit" value="Login" style="min-height: 5ex;"/></td></tr></table></form>');
     res.end(htmlFooter);
 });
