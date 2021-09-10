@@ -159,6 +159,10 @@ const htmlHeader = `
         border: 0.5px solid #504945;
         margin-bottom: 1ex;
       }
+      .dateText {
+        display: block;
+        margin-bottom: 1ex;
+      }
     </style>
     </head><body>`;
 const htmlFooter = '</body></html>';
@@ -210,7 +214,8 @@ const awcInfo = `
 
           var date = raw.querySelector('p[clear="both"]');
           var dateText = document.createElement('code');
-          dateText.innerHTML = date.innerText.replace(/.*Data at: ([0-9]*) UTC ([0-9]*) ([a-zA-Z]*) ([0-9]*).*/, 'Time: $1Z [$3 $2, $4]');
+          dateText.classList = 'dateText';
+          dateText.innerHTML = date.innerText.replace(/.*Data at: ([0-9]*) UTC ([0-9]*) ([a-zA-Z]*) ([0-9]*).*/, 'Time @ $1Z [$3 $2, $4]');
           info.appendChild(dateText);
           awcAirports.forEach(ap => {
             var table = document.createElement('table');
