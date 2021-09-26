@@ -50,10 +50,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(session({
-    genid: (req) => {
-        console.log(req.sessionID);
-        return uuid()
-    },
+    genid: (req) => uuid(),
     secret: 'myfbo-flights',
     resave: false,
     saveUninitialized: true,
@@ -393,7 +390,7 @@ app.get('/auth/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),
     function(req, res) {
         req.session.access_token = req.user.accessToken;
-        res.redirect('/');
+        res.redirect('../');
     });
 
 
