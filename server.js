@@ -114,6 +114,9 @@ const htmlHeader = `
       .indent {
         margin-right: 4ex;
       }
+      form.cell {
+        display: inline-block;
+      }
       input[type="submit"] {
         background-color: #3c3836;
         color: #fbf1c7;
@@ -178,6 +181,12 @@ const awcInfo = `
     <hr>
     <div id="awc">
       <h3>Info from aviationweather.gov</h3>
+      <form action="https://www.aviationweather.gov/gairmet" class="cell">
+        <input type="submit" value="AIRMET" onclick=""/>
+      </form>
+      <form action="https://www.aviationweather.gov/sigmet" class="cell">
+        <input type="submit" value="SIGMET" onclick=""/>
+      </form>
       <h4>Raw</h4>
     </div>
     <script>
