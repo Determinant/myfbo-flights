@@ -17,8 +17,19 @@ const RFC4122 = require('rfc4122');
 const port = 8080;
 const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
 const myCalendarId = "1luv5uti2j7hnq1ddcofv0sbn4@group.calendar.google.com";
-const googleClient = JSON.parse(fs.readFileSync(__dirname + "/.gapi"));
 const awcAirports = ['KPAO', 'KSFO', 'KSQL', 'KOAK'];
+
+const getJSONFile = fname => {
+    try {
+        return JSON.parse(fs.readFileSync(__dirname + '/' + fname));
+    } catch(e) {
+        console.log(`failed to open JSON file: ${fname}`);
+        return null;
+    }
+};
+const googleClient = getJSONFile(".gapi");
+const userTokenFile = ".utoken";
+let userAccessToken = getJSONFile(userTokenFile);
 
 const getAircraftLink = aircraft => {
     if (fbo == 'advantage') {
@@ -326,11 +337,10 @@ app.post('/update', async (req, res) => {
         const { text, records } = await showFlights();
         flights = text;
         res.redirect(`${root}/`);
-        const accessToken = req.session.access_token;
-        if (accessToken) {
+        if (userAccessToken) {
             let rfc4122 = new RFC4122();
             const auth = new google.auth.OAuth2();
-            auth.setCredentials({'access_token': accessToken});
+            auth.setCredentials({'access_token': userAccessToken});
             const cal = google.calendar({version: 'v3', auth});
             for (const r of records) {
                 const eventId = rfc4122.v5(`myfbo-flight-${r.entity}-${r.start.format()}-${r.end.format()}`, 'string').replace(/-/g, '');
@@ -375,27 +385,33 @@ app.post('/update', async (req, res) => {
     res.end();
 });
 
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-passport.use(new GoogleStrategy({
-    clientID: googleClient.clientID,
-    clientSecret: googleClient.clientSecret,
-    callbackURL: googleClient.callbackURL,
-    scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar.events']
-}, (accessToken, refreshToken, profile, done) => {
-    profile.accessToken = accessToken;
-    return done(null, profile);
-}));
+if (googleClient) {
+    const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+    passport.use(new GoogleStrategy({
+        clientID: googleClient.clientID,
+        clientSecret: googleClient.clientSecret,
+        callbackURL: googleClient.callbackURL,
+        scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar.events']
+    }, (accessToken, refreshToken, profile, done) => {
+        profile.accessToken = accessToken;
+        return done(null, profile);
+    }));
 
-app.get('/auth',
-  passport.authenticate('google', { session: false }));
+    app.get('/auth',
+        passport.authenticate('google', { session: true }));
 
-app.get('/auth/callback',
-  passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-    function(req, res) {
-        req.session.access_token = req.user.accessToken;
-        res.redirect('/');
-    });
-
+    app.get('/auth/callback',
+        passport.authenticate('google', { session: true, failureRedirect: '/' }),
+        function(req, res) {
+            userAccessToken = req.user.accessToken;
+            try {
+                fs.writeFileSync(userTokenFile, JSON.stringify(userAccessToken));
+            } catch(e) {
+                console.log(`failed to write to JSON file: ${userTokenFile}`);
+            }
+            res.redirect('../');
+        });
+}
 
 app.listen(port, () => {
     console.log(`listening at localhost:${port}`);
