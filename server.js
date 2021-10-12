@@ -17,7 +17,7 @@ const RFC4122 = require('rfc4122');
 const port = 8080;
 const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
 const myCalendarId = "1luv5uti2j7hnq1ddcofv0sbn4@group.calendar.google.com";
-const awcAirports = ['KPAO', 'KSFO', 'KSQL', 'KOAK'];
+const awcAirports = ['KSFO', 'KOAK', 'KSQL', 'KPAO', 'KSJC', 'KLVK'];
 
 const getJSONFile = fname => {
     try {
@@ -177,6 +177,18 @@ const htmlHeader = `
       img {
         max-width: 100%;
       }
+      div.airmet {
+        position: relative;
+        width: 650px;
+        height: 382px;
+        max-width: 100%;
+      }
+      div.airmet img {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+      }
     </style>
     </head><body>`;
 const htmlFooter = '</body></html>';
@@ -270,24 +282,32 @@ const awcInfo = `
           });
           document.getElementById('awc').appendChild(info);
         }).then(() => {
-          var label = document.createElement("h4");
-          label.innerText = "Decoded";
-          awc.appendChild(label);
-          return fetch('https://bft.rocks/awc/metar/data?ids=${awcAirports.map(s => s.toLowerCase()).join('+')}&format=decoded&date=&hours=0&taf=on',{
-            method: 'GET',
-            mode: 'cors',
-          }).then(response => response.text())
-            .then(html => {
-              var parser = new DOMParser();
-              var doc = parser.parseFromString(html, 'text/html');
-              doc.getElementById('app_menu').remove();
-              var raw = doc.getElementById('awc_main_content_wrap');
-              raw.querySelectorAll('table').forEach(e => {
-                e.classList = 'decoded';
-                awc.appendChild(e);
-              });
-            });
-        }).then(() => {
+            for (var t = 0; t < 15; t += 3) {
+              var airmet = document.createElement('div');
+              airmet.classList = 'airmet';
+              var img = document.createElement('img');
+              img.src = 'https://www.aviationweather.gov/images/gairmet/blanks/blank_us_map.gif';
+              airmet.appendChild(img);
+              var urlBase = 'https://www.aviationweather.gov/data/products/gairmet/';
+              var layers = [
+                'gairmet_ifr_us',
+                'gairmet_mt-obsc_us',
+                'gairmet_turb-lo_us',
+                'gairmet_sfc-wind_us',
+                'gairmet_llws_us',
+              ];
+              for (var i = 0; i < layers.length; i++) {
+                img = document.createElement('img');
+                img.src = urlBase + 'F' + ("0" + t).slice(-2) + '_' + layers[i] + '.gif';
+                airmet.appendChild(img);
+              }
+
+              var h4 = document.createElement('h4');
+              h4.innerText = 'AIRMET: ' + (t == 0 ? 'Latest' : '+' + t + ' hours');
+              awc.appendChild(h4);
+              awc.appendChild(airmet);
+            }
+
             fetch('https://bft.rocks/awc/data/products/progs/', {
               method: 'GET',
               mode: 'cors',
@@ -306,8 +326,8 @@ const awcInfo = `
                 img.src = 'https://www.aviationweather.gov/data/products/progs/F' + m[0] + m[1];
                 var h4 = document.createElement('h4');
                 var hrs = parseInt(m[0]);
-                h4.innerText =  hrs == 0 ? 'Current' : (
-                                hrs > 60 ? (hrs / 24).toFixed(0) + ' days': hrs + ' hours');
+                h4.innerText =  'Prog: ' + (hrs == 0 ? 'Latest' : ('+' + (
+                                hrs > 60 ? (hrs / 24).toFixed(0) + ' days': hrs + ' hours')));
                 awc.appendChild(h4);
                 awc.appendChild(img);
               });
