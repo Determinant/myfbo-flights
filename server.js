@@ -156,7 +156,7 @@ const htmlHeader = `
       body {
         background-color: #282828;
         color: #fbf1c7;
-        font-size: 1.2rem;
+        font-size: 1.0rem;
       }
       hr {
         border: 0;
