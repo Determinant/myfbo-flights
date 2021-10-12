@@ -279,8 +279,9 @@ const awcInfo = `
         }).then(() => {
             for (var t = 0; t < 15; t += 3) {
               var airmet = document.createElement('div');
+              var anchor = document.createElement('a');
+              anchor.id = 'airmet' + t;
               airmet.classList = 'airmet';
-              airmet.id = 'airmet' + t;
               var img = document.createElement('img');
               img.src = 'https://www.aviationweather.gov/images/gairmet/blanks/blank_us_map.gif';
               airmet.appendChild(img);
@@ -302,7 +303,8 @@ const awcInfo = `
               var h4 = document.createElement('h4');
               h4.innerText = 'AIRMET: ' + (t == 0 ? 'Latest' : '+' + t + ' hours');
               awc.appendChild(h4);
-              awc.appendChild(airmet);
+              anchor.appendChild(airmet);
+              awc.appendChild(anchor);
             }
 
             
