@@ -404,10 +404,10 @@ if (googleClient) {
     }));
 
     app.get('/auth',
-        passport.authenticate('google', { session: true }));
+        passport.authenticate('google', { session: false }));
 
     app.get('/auth/callback',
-        passport.authenticate('google', { session: true, failureRedirect: '/' }),
+        passport.authenticate('google', { session: false, failureRedirect: '/' }),
         function(req, res) {
             userAccessToken = req.user.accessToken;
             try {
