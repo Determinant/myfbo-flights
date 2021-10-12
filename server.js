@@ -270,7 +270,7 @@ const awcInfo = `
           var label = document.createElement("h4");
           label.innerText = "Decoded";
           awc.appendChild(label);
-          fetch('https://bft.rocks/awc/metar/data?ids=${awcAirports.map(s => s.toLowerCase()).join('+')}&format=decoded&date=&hours=0&taf=on',{
+          return fetch('https://bft.rocks/awc/metar/data?ids=${awcAirports.map(s => s.toLowerCase()).join('+')}&format=decoded&date=&hours=0&taf=on',{
             method: 'GET',
             mode: 'cors',
           }).then(response => response.text())
@@ -282,6 +282,31 @@ const awcInfo = `
               raw.querySelectorAll('table').forEach(e => {
                 e.classList = 'decoded';
                 awc.appendChild(e);
+              });
+            });
+        }).then(() => {
+            fetch('https://bft.rocks/awc/data/products/progs/', {
+              method: 'GET',
+              mode: 'cors',
+            }).then(response => response.text())
+            .then(html => {
+              var parser = new DOMParser();
+              var doc = parser.parseFromString(html, 'text/html');
+              var progs = Array.from(doc.querySelectorAll('tr a'))
+                                .filter(a => a.href.match(/F[0-9][0-9][0-9]_wpc_.*\\.gif/))
+                                .map(a => {
+                var m = a.href.match(/.*\\/F([0-9][0-9][0-9])(.*)/);
+                return [m[1], m[2]];
+              });
+              progs.forEach(m => {
+                var img = document.createElement('img');
+                img.src = 'https://www.aviationweather.gov/data/products/progs/F' + m[0] + m[1];
+                var h4 = document.createElement('h4');
+                var hrs = parseInt(m[0]);
+                h4.innerText =  hrs == 0 ? 'Current' : (
+                                hrs > 60 ? (hrs / 24).toFixed(0) + ' days': hrs + ' hours');
+                awc.appendChild(h4);
+                awc.appendChild(img);
               });
             });
         });
