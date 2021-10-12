@@ -115,6 +115,8 @@ const htmlHeader = `
         margin-right: 4ex;
       }
       form.cell {
+        margin-top: 4ex;;
+        margin-right: 2ex;
         display: inline-block;
       }
       input[type="submit"] {
@@ -196,12 +198,6 @@ const awcInfo = `
     <hr>
     <div id="awc">
       <h3>Info from aviationweather.gov</h3>
-      <form action="https://www.aviationweather.gov/gairmet" class="cell">
-        <input type="submit" value="AIRMET" onclick=""/>
-      </form>
-      <form action="https://www.aviationweather.gov/sigmet" class="cell">
-        <input type="submit" value="SIGMET" onclick=""/>
-      </form>
       <h4>Raw</h4>
     </div>
     <script>
@@ -307,6 +303,18 @@ const awcInfo = `
               awc.appendChild(h4);
               awc.appendChild(airmet);
             }
+
+            
+            function htmlToElement(html) {
+                var t = document.createElement('template');
+                html = html.trim();
+                t.innerHTML = html;
+                return t.content.firstChild;
+            }
+            var btn1HTML = '<form action="https://www.aviationweather.gov/gairmet" class="cell"><input type="submit" value="AIRMET" onclick=""/></form>';
+            var btn2HTML = '<form action="https://www.aviationweather.gov/sigmet" class="cell"><input type="submit" value="SIGMET" onclick=""/></form>';
+            awc.appendChild(htmlToElement(btn1HTML));
+            awc.appendChild(htmlToElement(btn2HTML));
 
             fetch('https://bft.rocks/awc/data/products/progs/', {
               method: 'GET',
