@@ -174,6 +174,9 @@ const htmlHeader = `
         display: block;
         margin-bottom: 1ex;
       }
+      img {
+        max-width: 100%;
+      }
     </style>
     </head><body>`;
 const htmlFooter = '</body></html>';
