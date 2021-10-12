@@ -182,10 +182,9 @@ const htmlHeader = `
       div.airmet {
         position: relative;
         width: 650px;
-        height: 382px;
         max-width: 100%;
       }
-      div.airmet img {
+      div.airmet .overlay {
         position: absolute;
         left: 0px;
         top: 0px;
@@ -281,6 +280,7 @@ const awcInfo = `
             for (var t = 0; t < 15; t += 3) {
               var airmet = document.createElement('div');
               airmet.classList = 'airmet';
+              airmet.id = 'airmet' + t;
               var img = document.createElement('img');
               img.src = 'https://www.aviationweather.gov/images/gairmet/blanks/blank_us_map.gif';
               airmet.appendChild(img);
@@ -294,6 +294,7 @@ const awcInfo = `
               ];
               for (var i = 0; i < layers.length; i++) {
                 img = document.createElement('img');
+                img.classList = 'overlay';
                 img.src = urlBase + 'F' + ("0" + t).slice(-2) + '_' + layers[i] + '.gif';
                 airmet.appendChild(img);
               }
