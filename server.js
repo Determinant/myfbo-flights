@@ -259,18 +259,24 @@ const awcInfo = `
 
             var metar = table.insertRow();
             var metarLabel = document.createElement('strong');
+            var metarCell = formatted[ap] !== undefined ? formatted[ap].metar : null;
+            if (metarCell === null) {
+                metarCell = document.createElement('code');
+                metarCell.innerText = "N/A";
+            }
             metarLabel.classList = 'metar';
             metar.insertCell().appendChild(metarLabel);
-            metar.insertCell().appendChild(formatted[ap].metar);
+            metar.insertCell().appendChild(metarCell);
             metarLabel.parentNode.classList = 'label';
 
             var taf = table.insertRow();
             var tafLabel = document.createElement('strong');
             var noTAF = document.createElement('code');
             noTAF.innerText = 'N/A';
+            var tafCell = formatted[ap] !== undefined ? (formatted[ap].taf || noTAF) : noTAF;
             tafLabel.classList = 'taf';
             taf.insertCell().appendChild(tafLabel);
-            taf.insertCell().appendChild(formatted[ap].taf || noTAF);
+            taf.insertCell().appendChild(tafCell);
             tafLabel.parentNode.classList = 'label';
 
             info.appendChild(table);
