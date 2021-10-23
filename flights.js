@@ -111,7 +111,7 @@ async function showFlightsPaperlessFBO() {
     const vs = raw.value;
 
     await axios
-        .post('https://advantage.paperlessfbo.com/', encodeForm({
+        .post(`https://${fbo}.paperlessfbo.com/`, encodeForm({
             'txtUserName': username,
             'txtPassword': password,
             'CheckRemember': 'on',
@@ -125,7 +125,7 @@ async function showFlightsPaperlessFBO() {
             jar: cookieJar,
             withCredentials: true
         });
-    ret = await axios.get('https://advantage.paperlessfbo.com/mstr8.aspx', {
+    ret = await axios.get(`https://${fbo}.paperlessfbo.com/mstr8.aspx`, {
         jar: cookieJar,
         withCredentials: true});
     const dom2 = new JSDOM(ret.data);

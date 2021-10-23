@@ -195,6 +195,13 @@ const htmlHeader = `
 const htmlFooter = '</body></html>';
 const awcInfo = `
     <hr>
+    <div>
+    <span>ATC:</span>
+    <audio controls autoplay style="vertical-align: middle; margin-left: 5px;">
+        <source src="https://s1-bos.liveatc.net/kpao2?noncache=" type="audio/ogg">
+    </audio>
+    </div>
+    <hr>
     <div id="awc">
       <h3>Info from aviationweather.gov</h3>
       <h4>Raw</h4>
