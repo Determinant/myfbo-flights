@@ -57,6 +57,7 @@ passport.deserializeUser((user, done) => {
 });
 
 let flights = null;
+let squawks_ = null;
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -81,6 +82,14 @@ function getRoot(req) {
     if (root === undefined)
         root = '';
     return root;
+}
+
+function genSquawks(squawks) {
+    let res = '';
+    Object.keys(squawks).forEach((key) => {
+            res += `<div><h4>${key}</h4>${squawks[key]}</div>`
+    })
+    return res;
 }
 
 const htmlHeader = `
@@ -189,6 +198,9 @@ const htmlHeader = `
         left: 0px;
         top: 0px;
         width: 100%;
+      }
+      div.pre {
+        font-family: monospace;
       }
     </style>
     </head><body>`;
@@ -365,13 +377,16 @@ const awcInfo = `
 
 app.get('/', async (req, res) => {
     if (flights === null) {
-        const { text } = await showFlights();
+        const { text, squawks } = await showFlights();
         flights = text;
+        squawks_ = genSquawks(squawks);
     }
     let root = getRoot(req);
     res.set('Content-Type', 'text/html');
     res.write(htmlHeader);
     res.write(`<pre>${flights}</pre> \
+        <h3>Squawks</h3>
+        <div class="pre">${squawks_}</div>
         ${req.user ?
         `<form action="${root}/update" method="POST" style="display: inline-block;"> \
             <input type="submit" value="Update" onclick="this.disabled=true; this.value='Updating'; this.form.submit();" style="min-width: 20ex;" /> \
@@ -418,6 +433,7 @@ app.post('/update', async (req, res) => {
         console.log('update');
         const { text, records } = await showFlights();
         flights = text;
+        squawks_ = genSquawks(squawks);
         res.redirect(`${root}/`);
         if (userAccessToken) {
             let rfc4122 = new RFC4122();
