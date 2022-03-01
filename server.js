@@ -452,7 +452,7 @@ app.post('/update', async (req, res) => {
     let root = getRoot(req);
     if (req.user) {
         console.log('update');
-        const { text, records } = await showFlights();
+        const { text, records, squawks } = await showFlights();
         flights = text;
         squawks_ = genSquawks(squawks);
         res.redirect(`${root}/`);
