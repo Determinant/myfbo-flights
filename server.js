@@ -17,7 +17,7 @@ const RFC4122 = require('rfc4122');
 const port = 8080;
 const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
 const myCalendarId = "1luv5uti2j7hnq1ddcofv0sbn4@group.calendar.google.com";
-const awcAirports = ['KSFO', 'KOAK', 'KSQL', 'KPAO', 'KSJC', 'KLVK'];
+const awcAirports = ['KSFO', 'KOAK', 'KSQL', 'KPAO', 'KSJC', 'KLVK', 'KHWD'];
 
 const getJSONFile = fname => {
     try {
@@ -167,6 +167,22 @@ const htmlHeader = `
         color: #fbf1c7;
         font-size: 1.0rem;
       }
+      @media print {
+        body {
+            zoom: 95%;
+            color: #282828;
+            background-color: #fbf1c7;
+        }
+        input {
+            display: none;
+        }
+        .atc {
+            display: none;
+        }
+        .flights {
+            display: none;
+        }
+      }
       hr {
         border: 0;
         height: 1px;
@@ -188,7 +204,7 @@ const htmlHeader = `
       img {
         max-width: 100%;
       }
-      div.airmet {
+      .airmet {
         position: relative;
         width: 650px;
         max-width: 100%;
@@ -207,10 +223,14 @@ const htmlHeader = `
 const htmlFooter = '</body></html>';
 const awcInfo = `
     <hr>
-    <div>
-    <span>ATC:</span>
+    <div class="atc">
+    <span>KPAO ATC:</span>
     <audio controls autoplay style="vertical-align: middle; margin-left: 5px;">
         <source src="https://s1-bos.liveatc.net/kpao2?noncache=" type="audio/ogg">
+    </audio>
+    <span>KPAO ATIS:</span>
+    <audio controls autoplay style="vertical-align: middle; margin-left: 5px;">
+        <source src="https://s1-fmt2.liveatc.net/kpao2_atis?noncache=" type="audio/ogg">
     </audio>
     </div>
     <hr>
@@ -358,6 +378,7 @@ const awcInfo = `
               progs.forEach(m => {
                 var img = document.createElement('img');
                 img.src = 'https://www.aviationweather.gov/data/products/progs/F' + m[0] + m[1];
+                img.classList = 'airmet';
                 var h4 = document.createElement('h4');
                 var hrs = parseInt(m[0]);
                 h4.innerText =  'Prog: ' + (hrs == 0 ? 'Latest' : ('+' + (
@@ -384,7 +405,7 @@ app.get('/', async (req, res) => {
     let root = getRoot(req);
     res.set('Content-Type', 'text/html');
     res.write(htmlHeader);
-    res.write(`<pre>${flights}</pre> \
+    res.write(`<pre class="flights">${flights}</pre> \
         <h3>Squawks</h3>
         <div class="pre">${squawks_}</div>
         ${req.user ?

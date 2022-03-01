@@ -154,6 +154,7 @@ async function showFlightsPaperlessFBO() {
         const entity = m[2].textContent;
         records.push({
             'entity': entity,
+            'cfi': m[6].textContent,
             'start': start,
             'end': end,
         });
@@ -162,7 +163,7 @@ async function showFlightsPaperlessFBO() {
     const fmtTime = m => m.format("HH:mm", timezone);
     for (let i = 0; i < records.length; i++) {
         const r = records[i];
-        res += `${i}. ${r.entity}: ${r.start.format("MMM DD YYYY")} [${fmtTime(r.start)}-${fmtTime(r.end)}] ${r.end.diff(r.start, 'hours')}h\n`;
+        res += `${i}. ${r.entity}: ${r.start.format("MMM DD YYYY")} [${fmtTime(r.start)}-${fmtTime(r.end)}] ${r.end.diff(r.start, 'hours')}h${r.cfi ? ' [' + r.cfi + ']' : ''}\n`;
         if (squawks[r.entity] === undefined) {
             squawks[r.entity] = await showSquawksPaperlessFBO(r.entity, s2, cookieJar);
         }
