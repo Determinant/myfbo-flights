@@ -167,6 +167,12 @@ const htmlHeader = `
         color: #fbf1c7;
         font-size: 1.0rem;
       }
+      .atc table td {
+          text-align: left;
+      }
+      .atc table td:first-child {
+          text-align: right;
+      }
       @media print {
         body {
             zoom: 95%;
@@ -215,8 +221,9 @@ const htmlHeader = `
         top: 0px;
         width: 100%;
       }
-      div.pre {
+      div.squawks {
         font-family: monospace;
+        margin-bottom: 4ex;
       }
     </style>
     </head><body>`;
@@ -224,15 +231,24 @@ const htmlFooter = '</body></html>';
 const awcInfo = `
     <hr>
     <div class="atc">
-    <span>KPAO ATC:</span>
+    <table>
+    <tr>
+    <td>KPAO ATC:</td>
+    <td>
     <audio controls autoplay style="vertical-align: middle; margin-left: 5px;">
         <source src="https://s1-bos.liveatc.net/kpao2?noncache=" type="audio/ogg">
     </audio>
-    <span>KPAO ATIS:</span>
-    <audio controls autoplay style="vertical-align: middle; margin-left: 5px;">
+    </td>
+    </tr>
+    <tr>
+    <td><span>KPAO ATIS:</span></td>
+    <td>
+    <audio controls style="vertical-align: middle; margin-left: 5px;">
         <source src="https://s1-fmt2.liveatc.net/kpao2_atis?noncache=" type="audio/ogg">
     </audio>
-    </div>
+    </td>
+    </tr>
+    </table>
     <hr>
     <div id="awc">
       <h3>Info from aviationweather.gov</h3>
@@ -407,7 +423,7 @@ app.get('/', async (req, res) => {
     res.write(htmlHeader);
     res.write(`<pre class="flights">${flights}</pre> \
         <h3>Squawks</h3>
-        <div class="pre">${squawks_}</div>
+        <div class="squawks">${squawks_}</div>
         ${req.user ?
         `<form action="${root}/update" method="POST" style="display: inline-block;"> \
             <input type="submit" value="Update" onclick="this.disabled=true; this.value='Updating'; this.form.submit();" style="min-width: 20ex;" /> \
