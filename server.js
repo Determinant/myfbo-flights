@@ -17,7 +17,7 @@ const RFC4122 = require('rfc4122');
 const port = 8080;
 const admin = {id: '42', email: 'ymf', password: 'ymf_ymf'};
 const myCalendarId = "1luv5uti2j7hnq1ddcofv0sbn4@group.calendar.google.com";
-const awcAirports = ['KSFO', 'KOAK', 'KSQL', 'KPAO', 'KSJC', 'KLVK', 'KHWD'];
+const awcAirports = ['KSFO', 'KOAK', 'KSQL', 'KPAO', 'KSJC', 'KHAF', 'KLVK', 'KHWD'];
 
 const getJSONFile = fname => {
     try {
@@ -210,10 +210,14 @@ const htmlHeader = `
       img {
         max-width: 100%;
       }
-      .airmet {
+      .airmetContainer {
         position: relative;
+      }
+      .airmet {
+        position: absolute;
         width: 650px;
         max-width: 100%;
+        display: none;
       }
       div.airmet .overlay {
         position: absolute;
@@ -338,6 +342,9 @@ const awcInfo = `
           });
           document.getElementById('awc').appendChild(info);
         }).then(() => {
+            var ac = document.createElement('div');
+            ac.classList = 'airmetContainer';
+            ac.style = 'height: 450px';
             for (var t = 0; t < 15; t += 3) {
               var airmet = document.createElement('div');
               airmet.id = 'airmet' + t;
@@ -362,9 +369,28 @@ const awcInfo = `
 
               var h4 = document.createElement('h4');
               h4.innerText = 'AIRMET: ' + (t == 0 ? 'Latest' : '+' + t + ' hours');
-              awc.appendChild(h4);
-              awc.appendChild(airmet);
+              //awc.appendChild(h4);
+              ac.appendChild(airmet);
             }
+            var n = ac.children.length;
+            var shown = 0;
+            var nextBtn = document.createElement('input');
+            nextBtn.style = "position: absolute; top: 390px;";
+            nextBtn.type = 'submit';
+            nextBtn.value = 'Next';
+            ac.appendChild(nextBtn);
+            ac.children[shown].style = "display: block;";
+            nextBtn.onclick = function() {
+                shown = (shown + 1) % n;
+                for (var i = 0; i < n; i++) {
+                    if (i == shown) {
+                        ac.children[i].style = "display: block;";
+                    } else {
+                        ac.children[i].style = "";
+                    }
+                }
+            };
+            awc.appendChild(ac);
 
             
             function htmlToElement(html) {
@@ -391,6 +417,9 @@ const awcInfo = `
                 var m = a.href.match(/.*\\/F([0-9][0-9][0-9])(.*)/);
                 return [m[1], m[2]];
               });
+              var ac = document.createElement('div');
+              ac.classList = 'airmetContainer';
+              ac.style = 'height: 500px';
               progs.forEach(m => {
                 var img = document.createElement('img');
                 img.src = 'https://www.aviationweather.gov/data/products/progs/F' + m[0] + m[1];
@@ -399,9 +428,28 @@ const awcInfo = `
                 var hrs = parseInt(m[0]);
                 h4.innerText =  'Prog: ' + (hrs == 0 ? 'Latest' : ('+' + (
                                 hrs > 60 ? (hrs / 24).toFixed(0) + ' days': hrs + ' hours')));
-                awc.appendChild(h4);
-                awc.appendChild(img);
+                //awc.appendChild(h4);
+                ac.appendChild(img);
               });
+              var n = ac.children.length;
+              var shown = 0;
+              var nextBtn = document.createElement('input');
+              nextBtn.style = "position: absolute; top: 500px;";
+              nextBtn.type = 'submit';
+              nextBtn.value = 'Next';
+              ac.appendChild(nextBtn);
+              ac.children[shown].style = "display: block;";
+              nextBtn.onclick = function() {
+                  shown = (shown + 1) % n;
+                  for (var i = 0; i < n; i++) {
+                      if (i == shown) {
+                          ac.children[i].style = "display: block;";
+                      } else {
+                          ac.children[i].style = "";
+                      }
+                  }
+              };
+              awc.appendChild(ac);
             }).then(() => {
               if (location.hash) {
                   var hash = location.hash;
