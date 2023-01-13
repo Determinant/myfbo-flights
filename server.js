@@ -344,7 +344,7 @@ const awcInfo = `
         }).then(() => {
             var ac = document.createElement('div');
             ac.classList = 'airmetContainer';
-            ac.style = 'height: 450px';
+            ac.style = 'height: 440px';
             for (var t = 0; t < 15; t += 3) {
               var airmet = document.createElement('div');
               airmet.id = 'airmet' + t;
@@ -399,10 +399,6 @@ const awcInfo = `
                 t.innerHTML = html;
                 return t.content.firstChild;
             }
-            var btn1HTML = '<form action="https://www.aviationweather.gov/gairmet" class="cell"><input type="submit" value="AIRMET" onclick=""/></form>';
-            var btn2HTML = '<form action="https://www.aviationweather.gov/sigmet" class="cell"><input type="submit" value="SIGMET" onclick=""/></form>';
-            awc.appendChild(htmlToElement(btn1HTML));
-            awc.appendChild(htmlToElement(btn2HTML));
 
             fetch('https://bft.rocks/awc/data/products/progs/', {
               method: 'GET',
@@ -419,7 +415,7 @@ const awcInfo = `
               });
               var ac = document.createElement('div');
               ac.classList = 'airmetContainer';
-              ac.style = 'height: 500px';
+              ac.style = 'height: 550px';
               progs.forEach(m => {
                 var img = document.createElement('img');
                 img.src = 'https://www.aviationweather.gov/data/products/progs/F' + m[0] + m[1];
@@ -434,7 +430,7 @@ const awcInfo = `
               var n = ac.children.length;
               var shown = 0;
               var nextBtn = document.createElement('input');
-              nextBtn.style = "position: absolute; top: 500px;";
+              nextBtn.style = "position: absolute; top: 495px;";
               nextBtn.type = 'submit';
               nextBtn.value = 'Next';
               ac.appendChild(nextBtn);
@@ -450,6 +446,12 @@ const awcInfo = `
                   }
               };
               awc.appendChild(ac);
+
+              var btn1HTML = '<form action="https://www.aviationweather.gov/gairmet" class="cell"><input type="submit" value="AIRMET" onclick=""/></form>';
+              var btn2HTML = '<form action="https://www.aviationweather.gov/sigmet" class="cell"><input type="submit" value="SIGMET" onclick=""/></form>';
+             awc.appendChild(htmlToElement(btn1HTML));
+             awc.appendChild(htmlToElement(btn2HTML));
+
             }).then(() => {
               if (location.hash) {
                   var hash = location.hash;
