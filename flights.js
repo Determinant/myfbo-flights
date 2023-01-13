@@ -170,9 +170,9 @@ async function showFlightsPaperlessFBO() {
     }
     if (lessonToday >= 0) {
         const d = records[lessonToday];
-        res += `!!! There is a lesson today: ${fmtTime(d.start)}-${fmtTime(d.end)}.\n`;
+        res += `!!! Flying today: ${fmtTime(d.start)}-${fmtTime(d.end)}.\n`;
     } else {
-        res += `No lesson today.\n`;
+        res += `No flights today.\n`;
     }
     return { text: res, records, squawks };
 }
